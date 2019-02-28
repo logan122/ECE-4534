@@ -172,6 +172,41 @@ void motorL_recvQInISR(struct pwmQueueData* msg)
     xQueueReceiveFromISR(left_q, msg, NULL);
 }
 
+QueueHandle_t sensor_values;
+
+void create_sensor_value_queue()
+{
+    sensor_values = xQueueCreate(100, sizeof(char));
+    //dbgOutputVal(17);
+}
+
+void s_valsQueueSend(char s_vals)
+{   
+    //dbgOutputVal(20);
+    xQueueSendToBack(sensor_values, &s_vals, portMAX_DELAY); 
+}
+
+char sValsQueueReceiveFromISR(BaseType_t *pxHigherPriorityTaskWoken)
+{
+    char t_char;
+    xQueueReceiveFromISR(sensor_values, &t_char, pxHigherPriorityTaskWoken);
+    return t_char;
+}
+
+char sValsQueueReceive()
+{
+    char s_byte;
+    xQueueReceive(sensor_values, &s_byte, portMAX_DELAY);
+    return s_byte;
+}
+
+sens_message sensorQueue()
+{
+    sens_message val;
+    xQueueReceive(sensor_values, &val, portMAX_DELAY);
+    return val;
+}
+
 bool rightQIsEmpty()
 {
     return xQueueIsQueueEmptyFromISR(right_q);
@@ -182,7 +217,7 @@ bool leftQIsEmpty()
     return xQueueIsQueueEmptyFromISR(left_q);
 }
 
-void stop_hold (void){
+void stop_hold(void){
     int z = 0;
     for(z = 0; z < 1800000000; z++);
 }

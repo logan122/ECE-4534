@@ -16,6 +16,7 @@ void sBytesQueueSend(char s_byte);
 char sBytesQueueReceiveFromISR(BaseType_t *pxHigherPriorityTaskWoken);
 char sBytesQueueReceive();
 unsigned int sBytesQueueEmptyFromISR();
+//
 
 #endif	/* S_BYTES_QUEUE_H */
 

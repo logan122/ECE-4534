@@ -17,21 +17,6 @@ unsigned int readADCBlocking_FR()
     return (unsigned int)DRV_ADC_SamplesRead(1);
 }
 
-unsigned int readADCBlocking_LS()
-{
-    DRV_ADC_Start();
-    while(!(DRV_ADC_SamplesAvailable()));
-    return (unsigned int)DRV_ADC_SamplesRead(2);
-}
-
-unsigned int readADCBlocking_RS()
-{
-    DRV_ADC_Start();
-    while(!(DRV_ADC_SamplesAvailable()));
-    return (unsigned int)DRV_ADC_SamplesRead(3);
-}
-
-
 
 unsigned int convertADCVal(unsigned int ADCVal)
 {

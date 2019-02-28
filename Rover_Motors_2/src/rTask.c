@@ -54,6 +54,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 
 #include "rTask.h"
+#include "motor_control.h"
+#include "motor_globals.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -125,6 +127,60 @@ void RTASK_Initialize ( void )
     See prototype in rtask.h.
  */
 
+static int jsoneq(const char *json, jsmntok_t *tok, const char *s) 
+{
+	if (tok->type == JSMN_STRING && (int) strlen(s) == tok->end - tok->start &&
+			strncmp(json + tok->start, s, tok->end - tok->start) == 0) 
+    {
+		return 0;
+	}
+	return -1;
+}
+
+int getIntFromKey(jsmntok_t key)
+{
+    unsigned int length = key.end - key.start;
+    char keyString[length + 1];    
+    memcpy(keyString, &JSON_STRING[key.start], length);
+    keyString[length] = '\0';
+    return atoi(keyString);
+}
+
+struct motorQueueData parseJSON (unsigned char rec[UART_RX_QUEUE_SIZE]) 
+{
+    struct motorQueueData out;
+    out.type = ACTION;
+    JSON_STRING = rec;
+    int r;
+    jsmn_parser p;
+    jsmntok_t t[128]; /* We expect no more than 128 tokens */
+    jsmn_init(&p);
+    r = jsmn_parse(&p, JSON_STRING, strlen(JSON_STRING), t, sizeof(t)/sizeof(t[0]));
+    
+    /* Get the sequence ID number */
+    int seq = getIntFromKey(t[2]);
+    /* Is it the expected next sequence? */
+    if (seq != prev_inc_seq + 1) // ERROR
+    {
+        char buf[128];
+        sprintf(buf, STR_SEQUENCE_ERROR, outgoing_seq, prev_inc_seq+1, seq);
+    }
+    prev_inc_seq = seq;
+
+    if(r == 9) // ACTION
+    {
+        out.action = getIntFromKey(t[4]);  //color red or green
+    }
+  
+    else // ERROR
+    {
+        // Send message back to server something is wrong
+        char buf[128];
+        sprintf(buf, STR_JSON_ERROR, outgoing_seq);
+    }
+    return out;
+}
+
 //define the states of the state machine
 typedef enum {
     BEGIN_STATE = 10,
@@ -140,6 +196,7 @@ void RTASK_Tasks ( void )
     unsigned char r_byte;
     r_state state = BEGIN_STATE;  //set the starting state
     unsigned int count = 0;
+    unsigned int color_count = 0;
 
     while(1)
     {
@@ -176,6 +233,18 @@ void RTASK_Tasks ( void )
             dbgOutputVal(END_STATE);
             state = BEGIN_STATE;
             //Logan - This is where the parser code goes as the message has been fully completed
+            struct  motorQueueData out = parseJSON(rec);
+            //sendMsgToMotorQ(out);
+            if(color_count == 0){
+                sendMsgToMotorQ(color[0]);
+            }
+            else if(color_count == 1){
+                sendMsgToMotorQ(color[1]);
+            }
+            else if(color_count == 2){
+                sendMsgToMotorQ(color[2]);
+            }
+            
         }
     }
     

@@ -27,16 +27,12 @@ QueueHandle_t sens_queue_RS; //sensor queue
 
 unsigned int readADCBlocking_FL();
 unsigned int readADCBlocking_FR();
-unsigned int readADCBlocking_LS();
-unsigned int readADCBlocking_RS();
 unsigned int convertADCVal(unsigned int ADCVal);
 
 void sensorQueueSend(unsigned int convertedVal_FL, unsigned int convertedVal_FR, unsigned int convertedVal_LS, unsigned int convertedVal_RS);
 void sensorQueueSendFromISR(sens_message mess, BaseType_t *xHigherPriorityTaskWoken);
 sens_message sensorQueueReceive_FL();
 sens_message sensorQueueReceive_FR();
-sens_message sensorQueueReceive_LS();
-sens_message sensorQueueReceive_RS();
 sens_message sensorQueueReceiveFromISR();
 void create_sensor_queue();
 

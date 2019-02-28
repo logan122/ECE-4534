@@ -54,7 +54,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 #include "system_config.h"
 #include "system_definitions.h"
-#include "app.h"
+#include "motor_control.h"
 
 
 // *****************************************************************************
@@ -68,7 +68,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 static void _SYS_Tasks ( void );
  
  
-static void _APP_Tasks(void);
+static void _MOTOR_CONTROL_Tasks(void);
+static void _RTASK_Tasks( void );
 
 
 // *****************************************************************************
@@ -94,10 +95,15 @@ void SYS_Tasks ( void )
 
  
  
-    /* Create OS Thread for APP Tasks. */
-    xTaskCreate((TaskFunction_t) _APP_Tasks,
-                "APP Tasks",
+    /* Create OS Thread for MOTOR_CONTROL Tasks. */
+    xTaskCreate((TaskFunction_t) _MOTOR_CONTROL_Tasks,
+                "MOTOR_CONTROL Tasks",
                 1024, NULL, 1, NULL);
+    
+    /* Create OS Thread for RTASK Tasks. */
+    xTaskCreate((TaskFunction_t) _RTASK_Tasks,
+                "RTASK Tasks",
+                2048, NULL, 1, NULL);
 
     /**************
      * Start RTOS * 
@@ -126,6 +132,7 @@ static void _SYS_Tasks ( void)
         /* Maintain Middleware */
 
         /* Task Delay */
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
 
@@ -134,20 +141,34 @@ static void _SYS_Tasks ( void)
 
 /*******************************************************************************
   Function:
-    void _APP_Tasks ( void )
-
+    void _MOTOR_CONTROL_Tasks ( void )
   Summary:
-    Maintains state machine of APP.
+    Maintains state machine of MOTOR_CONTROL.
 */
 
-static void _APP_Tasks(void)
+static void _MOTOR_CONTROL_Tasks(void)
 {
     while(1)
     {
-        APP_Tasks();
+        MOTOR_CONTROL_Tasks();
     }
 }
 
+/*******************************************************************************
+  Function:
+    void _RTASK_Tasks ( void )
+
+  Summary:
+    Maintains state machine of RTASK.
+*/
+
+static void _RTASK_Tasks(void)
+{
+    while(1)
+    {
+        RTASK_Tasks();
+    }
+}
 
 /*******************************************************************************
  End of File

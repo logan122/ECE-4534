@@ -189,9 +189,27 @@ void RTASK_Tasks( void );
 
 #endif /* _RTASK_H */
 
-//DOM-IGNORE-BEGIN
-#ifdef __cplusplus
-}
+#define UART_RX_QUEUE_SIZE  256
+#define UART_TX_QUEUE_SIZE  256
+
+// Error strings
+#define STR_SEQUENCE_ERROR	"{\"SEQ\":%i,\"ROVER\":{\"STATUS\":1,\"MSG\":\"Missing sequence number, expected %u got %u\"}}!"
+#define STR_JSON_ERROR		"{\"SEQ\":%i,\"ROVER\":{\"STATUS\":1,\"MSG\":\"Bad JSON message format\"}}!"
+
+// Used to check messages
+int prev_inc_seq = 0;
+
+// JSMN functions
+static const char *JSON_STRING;
+static int jsoneq(const char *json, jsmntok_t *tok, const char *s);
+struct motorQueueData parseJSON (unsigned char rec[UART_RX_QUEUE_SIZE]);
+int getIntFromKey(jsmntok_t key); 
+
+const char *color[] = {"green", "red", "green"};
+
+// Sequence number counter
+int outgoing_seq = 0;
+
 #endif
 //DOM-IGNORE-END
 
